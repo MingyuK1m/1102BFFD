@@ -10,8 +10,11 @@ import UIKit
 
 class MainView: UITableViewController, XMLParserDelegate {
     
-    //엔드 포인트
+    //엔드 포인트 기본
     let endpoint = "http://apis.data.go.kr/6260000/BusanFreeFoodProvidersInfoService/getFreeProvidersListInfo"
+    
+    //엔드 포인트 상세
+    let dendpoint = "http://apis.data.go.kr/6260000/BusanFreeFoodProvidersInfoService/getFreeProvidersDetailsInfo"
     
     //api를 사용하기 위한 개인 키
     let apikey = "3L0t1Le0OHr%2BokuEyRQNFEet%2B%2FZU3S7%2FsccY9Xi4krQWLv83G1KflEpY3i0jYU9Ggs2dXGCKau8Y3Q9JFAunXw%3D%3D"
@@ -23,10 +26,40 @@ class MainView: UITableViewController, XMLParserDelegate {
     override func viewDidLoad() {
         super.viewDidLoad()
        
-        self.title = "부산 급식소"
+        self.title = "부산 무료 급식소"
+        
+        //파일을 만들어서 데이터를 넣을 공간을 만든다.
+        let fileManager = FileManager.default
+        let url = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first?.appendingPathComponent("bff.plist")
+        
+        
+        if fileManager.fileExists(atPath: (url?.path)!){
+            //데이터를 읽는 기능
+            items = NSArray(contentsOf: url!) as! Array
+        } else {
+            getList()
+            
+            //리스트의 정보를 잠시 담아둘 빈 공간을 생성 한다.
+            let tempItems = items
+            //공간을 빈공간을 생성해준다.
+            items = []
+            
+            //상세정보를 불러오기 위해서
+            for dic in tempItems {
+                getDetail(idx: dic["idx"]!)
+            }
+            
+            //데이터를 넣는 기능
+            let temp = items as NSArray
+            temp.write(to: url!, atomically: true)
+        }
+    }
+    
+    //리스트를 가져오는것
+    func  getList(){
         
         //한글을 안쓸경우 nsstring을 안써도 된다.
-        let str = "\(endpoint)?serviceKey=\(apikey)"
+        let str = "\(endpoint)?serviceKey=\(apikey)&numofRows=100"
         
         //한글이나 특수문자를 코드로 바꿔주는 코드 한글이 필요없으면 안써도 된다
         //let strURL = str.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed)
@@ -45,7 +78,34 @@ class MainView: UITableViewController, XMLParserDelegate {
             if success {
                 print("parse sucess!")
                 print(items)
-                tableView.reloadData()
+            } else {
+                print("parse failure!")
+            }
+        }
+    }
+    
+    func getDetail(idx:String){
+        
+        //한글을 안쓸경우 nsstring을 안써도 된다.
+        let str = "\(dendpoint)?serviceKey=\(apikey)&idx=\(idx)"
+        
+        //한글이나 특수문자를 코드로 바꿔주는 코드 한글이 필요없으면 안써도 된다
+        //let strURL = str.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed)
+        
+        let url = URL(string: str)
+        
+        print(url ?? "url is error") //에러 확인
+        
+        //url을 테스트하여 작동이 되는 지 확인하는 동작
+        //URL전환, xml파싱을 하는 코드
+        
+        if  let url = URL(string: str), let parser = XMLParser(contentsOf: url){
+            parser.delegate = self
+            
+            let success = parser.parse()
+            if success {
+                print("parse sucess!")
+                print(items)
             } else {
                 print("parse failure!")
             }
@@ -107,51 +167,4 @@ class MainView: UITableViewController, XMLParserDelegate {
 
         return cell
     }
-    
-
-    /*
-    // Override to support conditional editing of the table view.
-    override func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {
-        // Return false if you do not want the specified item to be editable.
-        return true
-    }
-    */
-
-    /*
-    // Override to support editing the table view.
-    override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCellEditingStyle, forRowAt indexPath: IndexPath) {
-        if editingStyle == .delete {
-            // Delete the row from the data source
-            tableView.deleteRows(at: [indexPath], with: .fade)
-        } else if editingStyle == .insert {
-            // Create a new instance of the appropriate class, insert it into the array, and add a new row to the table view
-        }    
-    }
-    */
-
-    /*
-    // Override to support rearranging the table view.
-    override func tableView(_ tableView: UITableView, moveRowAt fromIndexPath: IndexPath, to: IndexPath) {
-
-    }
-    */
-
-    /*
-    // Override to support conditional rearranging of the table view.
-    override func tableView(_ tableView: UITableView, canMoveRowAt indexPath: IndexPath) -> Bool {
-        // Return false if you do not want the item to be re-orderable.
-        return true
-    }
-    */
-
-    /*
-    // MARK: - Navigation
-
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        // Get the new view controller using segue.destinationViewController.
-        // Pass the selected object to the new view controller.
-    }
-    */
-
 }
