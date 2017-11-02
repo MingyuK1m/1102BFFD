@@ -67,7 +67,13 @@ class MainView: UITableViewController, XMLParserDelegate {
     //키를 이용하여 데이터를 찾아 넣는다.
     func parser(_ parser: XMLParser, foundCharacters string: String) {
         //api가 이상할경우 trim을 사용하고 . whitespaces를 사용한다
-        item[currentElement] = string.trimmingCharacters(in: .whitespacesAndNewlines)
+        //api가 이상할 경우 2번 호출이 된다. 그럴 경우 nil을 사용하여 비교한다
+        
+        if item[currentElement] == nil {
+            item[currentElement] = string.trimmingCharacters(in: .whitespacesAndNewlines)
+        }
+        
+        print("key : \(currentElement) value: \(string)")
     }
     
     //파싱이 끝나서 배열에 집어넣는다.
@@ -86,18 +92,22 @@ class MainView: UITableViewController, XMLParserDelegate {
 
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         // #warning Incomplete implementation, return the number of rows
-        return 0
+        return items.count
     }
 
-    /*
+    
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "reuseIdentifier", for: indexPath)
+        
+        let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath)
 
-        // Configure the cell...
+        let dic = items[indexPath.row]
+        
+        cell.textLabel?.text = dic["name"]
+        cell.detailTextLabel?.text = dic["mealDay"]
 
         return cell
     }
-    */
+    
 
     /*
     // Override to support conditional editing of the table view.
