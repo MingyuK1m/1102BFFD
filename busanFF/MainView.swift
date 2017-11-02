@@ -32,6 +32,8 @@ class MainView: UITableViewController, XMLParserDelegate {
         let fileManager = FileManager.default
         let url = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first?.appendingPathComponent("bff.plist")
         
+        print(url)
+        
         
         if fileManager.fileExists(atPath: (url?.path)!){
             //데이터를 읽는 기능
@@ -59,7 +61,7 @@ class MainView: UITableViewController, XMLParserDelegate {
     func  getList(){
         
         //한글을 안쓸경우 nsstring을 안써도 된다.
-        let str = "\(endpoint)?serviceKey=\(apikey)&numofRows=100"
+        let str = "\(endpoint)?serviceKey=\(apikey)&numofRows=10"
         
         //한글이나 특수문자를 코드로 바꿔주는 코드 한글이 필요없으면 안써도 된다
         //let strURL = str.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed)
@@ -77,7 +79,7 @@ class MainView: UITableViewController, XMLParserDelegate {
             let success = parser.parse()
             if success {
                 print("parse sucess!")
-                print(items)
+              //  print(items)
             } else {
                 print("parse failure!")
             }
@@ -133,7 +135,7 @@ class MainView: UITableViewController, XMLParserDelegate {
             item[currentElement] = string.trimmingCharacters(in: .whitespacesAndNewlines)
         }
         
-        print("key : \(currentElement) value: \(string)")
+        //print("key : \(currentElement) value: \(string)")
     }
     
     //파싱이 끝나서 배열에 집어넣는다.
